@@ -17,7 +17,7 @@ Processing combustion layer data for Landscapes used in simulation models.
 ## Part 2
 
 
-## GEE
+### GEE
 
 GEE Scripts
 1. Script 1
@@ -32,3 +32,10 @@ Three scripts from Stefano; all of these scripts take a shapefile of burned pixe
 
 
 All of these scripts take a shapefile of burned pixel centroids as the input.  The shapefile needs to have a date of burn, a unique pixel identifier and the year of burn in order to get all the scripts to work.  All the scripts will output csv files which can then be used to predict the R models on and those predictions can be joined back into the shapefile based on each pixel's unique ID and then rasterized.  
+
+## part 3
+
+Predictive modeling with XGboost
+
+### Data that feeds into this 
+
