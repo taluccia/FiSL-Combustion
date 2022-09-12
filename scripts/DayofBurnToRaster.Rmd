@@ -1,0 +1,87 @@
+---
+title: "DayOfBurn"
+author: "Anna Talucci"
+date: '2022-09-12'
+output: html_document
+---
+
+# Overview
+
+This script generates a point file from a  Landsat raster and fire perimeters to be used to extract WNA Climate data and then process combustion with ABoVE-FED.
+
+Fire years for Poker Creek
+2004
+2005
+2015
+2016
+
+# Projections
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+```
+
+
+# Packages
+```{r}
+library(terra)
+library(gdalUtilities)
+library(sf)
+library(tidyverse)
+```
+
+# Data
+## DoB csv
+
+```{r}
+dob = read.csv("../data/DayOfBurn/dayofburn_2004.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+head(dob)
+```
+
+## Perimeter
+
+```{r}
+fp1 = st_read("../data/Landscape1Perimeters/193__Boundary_20040901_1400/193__Boundary_20040901_1400.shp", "193__Boundary_20040901_1400")
+```
+
+
+```{r}
+fp1
+```
+
+# CSV to points
+```{r}
+dob_points = st_as_sf(dob, coords = c("longitude", "latitude"), crs = 4326)
+```
+
+```{r}
+dob_points
+```
+
+```{r}
+dob_pts = st_transform(dob_points, crs = st_crs(fp1))
+```
+
+```{r}
+dob_pts
+```
+
+```{r}
+plot(st_geometry(dob_points))
+```
+# Rasterize
+
+```{r}
+dob_raster = rasterize(pv, r, fun=sum)
+```
+
+
+# Plot
+```{r}
+plot(st_geometry(fp1))
+plot(st_geometry(dob_points), add=TRUE)
+```
+
