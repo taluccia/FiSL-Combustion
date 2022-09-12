@@ -11,6 +11,19 @@ output: html_document
 
 This script generates a point file from a  Landsat raster and fire perimeters to be used to extract WNA Climate data and then process combustion with ABoVE-FED.
 
+Fire years for Poker Creek
+2004
+2005
+2015
+2016
+
+# Projections
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+```
+
+
 # Packages
 ```{r}
 library(terra)
@@ -235,4 +248,14 @@ ggplot() +
 # Write burned points to file
 ```{r eval=FALSE, include=FALSE}
 st_write(burned, "../outputs/Landscape1_burned_points.shp", driver="ESRI Shapefile")
+```
+
+# Convert to WGS 84
+
+```{r}
+burned_wgs = st_transform(burned, crs=wgs_proj)
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(burned_wgs, "../outputs/Landscape1_burned_points_wgs.shp", driver="ESRI Shapefile")
 ```
