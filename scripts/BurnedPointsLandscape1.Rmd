@@ -56,6 +56,11 @@ fp1
 ```
 
 ```{r}
+head(fp2)
+head(fp3)
+head(fp4)
+```
+```{r}
 st_crs(fp1)$proj4string
 fp1_projection = st_crs(fp1)$proj4string
 st_crs(fp1)$epsg
