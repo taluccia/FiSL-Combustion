@@ -1,0 +1,100 @@
+---
+title: "Combustion Model"
+author: "Anna Talucci"
+date: '2022-09-28'
+output: html_document
+---
+
+# Overview
+
+# Library
+```{r}
+library(tidyverse)
+library(ranger)
+library(e1071)
+```
+# Models
+```{r}
+model_above <- readRDS("../models/aboveground.rds")
+model_below <- readRDS("../models/belowgrounds.rds")
+model_depth <- readRDS("../models/burn_depth.rds")
+```
+
+```{r eval=FALSE, include=FALSE}
+model_above 
+```
+
+# Training Data
+```{r}
+above_importance =  read.csv("../data/TrainingDataFrame/aboveground_importance.csv", header=TRUE, sep = ",", strip.white = TRUE)
+below_importance =  read.csv("../data/TrainingDataFrame/belowground_importance.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+#Training models 
+Training each model with optimized parameters from Stefano ABOVEFed Model
+```{r}
+model_ranger_above <- ranger(y ~., data = df, mtry = final_model$bestTune$mtry, splitrule = final_model$bestTune$splitrule, min.node.size = final_model$bestTune$min.node.size)
+```
+
+```{r}
+model_ranger_below <- ranger(y ~., data = df, mtry = final_model$bestTune$mtry, splitrule = final_model$bestTune$splitrule, min.node.size = final_model$bestTune$min.node.size)
+```
+
+# Predict
+Not finished...
+```{r}
+predict(object=model_above, newdata = Landscape1, type="response", norm.votes=TRUE, predict.all=FALSE, proximity=FALSE, nodes=FALSE, cutoff, ...)
+```
+
+
+# Stefano's code (copied from Slack)
+
+#read in the model I sent
+```{r}
+final_model <- readRDS(in_model)
+```
+#read in the dataframe initially used to train the model
+```{r}
+df = read_csv(training_frame)
+```
+#train new model using optimized paramaters
+```{r}
+  model_ranger_final <- ranger(y ~., data = df, mtry = final_model$bestTune$mtry, splitrule = final_model$bestTune$splitrule, min.node.size = final_model$bestTune$min.node.size)
+```
+#read in final data to predict on
+```{r}
+pred_df = read_csv(pred_frame)
+```
+
+#predict 
+```{r}
+ preds <- predict(model_ranger_final, data = pred_df)
+```
+#pul out predictions
+```{r}
+preds = preds$Preds
+```
+#read in the model I sent
+```{r}
+final_model <- readRDS(in_model)
+```
+#read in the dataframe initially used to train the model
+```{r}
+df = read_csv(training_frame)
+```
+#train new model using optimized paramaters
+```{r}
+model_ranger_final <- ranger(y ~., data = df, mtry = final_model$bestTune$mtry, splitrule = final_model$bestTune$splitrule, min.node.size = final_model$bestTune$min.node.size)
+```
+#read in final data to predict on
+```{r}
+pred_df = read_csv(pred_frame)
+```
+#predict 
+```{r}
+ preds <- predict(model_ranger_final, data = pred_df)
+```
+#pul out predictions
+```{r}
+preds = preds$Preds
+```
