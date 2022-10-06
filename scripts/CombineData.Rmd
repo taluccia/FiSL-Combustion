@@ -1,0 +1,90 @@
+---
+title: "Compile data"
+author: "Anna Talucci"
+date: '2022-09-29'
+output: html_document
+---
+
+# Overview
+
+
+# Librarys
+```{r}
+library(tidyverse)
+```
+
+# Data
+
+## FWI
+
+
+```{r}
+fwi_bind <- list.files(path = "../data/Landscape1/fwi/", # Identify all CSV files
+                       pattern = "*.csv", full.names = TRUE) %>% 
+  lapply(read_csv) %>%                              # Store all files in list
+  bind_rows   # bind data sets into one data set 
+```
+
+```{r}
+fwi_bind 
+```
+
+## Landsat
+```{r}
+landsat =  list.files(path = "../data/Landscape1/Landsat/", # Identify all CSV files
+                       pattern = "*.csv", full.names = TRUE) %>% 
+  lapply(read_csv) %>%                              # Store all files in list
+  bind_rows   # bind data sets into one data set 
+```
+
+```{r}
+landsat
+```
+
+## Static
+```{r}
+static2004 =  read.csv("../data/Landscape1/Static/static_test2004.csv", header=TRUE, sep = ",", strip.white = TRUE)
+static2005 =  read.csv("../data/Landscape1/Static/static_test2005.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+```{r}
+static2005
+```
+```{r}
+static2004
+```
+```{r}
+static = rbind(static2004, static2005)
+static
+```
+
+# Select columns & rename to match
+```{r}
+static1 = static %>% 
+  dplyr::select(BD_30:pH_30) %>%
+  rename( ID1 = UniqueId, ID2 = FIREYEAR) 
+
+static1
+```
+
+```{r}
+landsat1 = landsat %>% 
+  dplyr::select(FIREID:wetness) %>%
+  rename( ID1 = UniqueId, ID2 = FIREYEAR) 
+```
+
+
+```{r}
+fwi1 = fwi_bind %>% 
+  dplyr::select(BUI:wspeed)  
+```
+# Check number of IDs
+```{r}
+length(unique(landsat1$ID1))
+length(unique(static1$ID1))
+length(unique(fwi1$ID1))
+```
+
+
+
+
+**THE END**
