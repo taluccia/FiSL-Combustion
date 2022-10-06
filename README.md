@@ -7,12 +7,14 @@ Processing combustion layer data for Landscapes used in simulation models.
 # Process
 
 ## Part 1 Point file for combustion
-1. Identify fires that occurred in the landscape
+1. Identify fires that occurred in the landscape 1
 2. Download Fire perimeters
 3. Clip fire perimeters to Landscape boundary
 4. Obtain Landsat image for landscape
 5. Overlay Landsat Raster with Landscape burned area ()
 6. Convert Raster to points for burned area
+7. Add unique ID to each point so outputs from EE can be combined into a single dataframe
+
 
 ## Part 2
 
@@ -35,7 +37,9 @@ All of these scripts take a shapefile of burned pixel centroids as the input.  T
 
 ## part 3
 
-Predictive modeling with XGboost
+Predictive modeling with XGboost (Future)
+
+Use random forest existing models for Aboveground, below ground and depth of burn to predict combustion for landscape 1
 
 ### Data that feeds into this 
 
