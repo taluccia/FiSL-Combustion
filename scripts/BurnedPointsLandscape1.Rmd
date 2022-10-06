@@ -17,6 +17,8 @@ Fire years for Poker Creek
 2015
 2016
 
+Because fires in 2015 &2016 were less than 40 acres these do not registrar for thermal hotspots, and were excluded eventually because not FWI data.
+
 # Projections
 WGS 84 need for gee
 ```{r}
@@ -30,6 +32,7 @@ library(terra)
 library(gdalUtilities)
 library(sf)
 library(tidyverse)
+library(ids)
 ```
 
 # Data
@@ -98,6 +101,8 @@ ggplot() +
   ggtitle("Landscape 1") + 
   coord_sf()
 ```
+
+# Use 2004 (fp1) & 2005 (fp5)
 ```{r}
 fp1L1<-st_crop( fp1$geometry, L1$geometry)
 fp5L1<-st_crop( fp5$geometry, L1$geometry)
@@ -194,6 +199,11 @@ fp4L1 = fp4 %>% dplyr::select(NAME, FIREID, FIREYEAR)
 ```
 
 # Combine fires
+```{r}
+fires_2004_2005 = dplyr::bind_rows(fp1L1_v1, fp5L1_v1)
+fires_2004_2005
+
+```
 
 ```{r}
 all_fires = dplyr::bind_rows(fp1L1_v1, fp2L1, fp3L1, fp4L1, fp5L1_v1)
@@ -235,12 +245,39 @@ ggplot() +
 
 # Select only burned points
 ```{r}
+burned_2004_2005 = st_join(l1pts, fires_2004_2005) %>% drop_na(.)
+```
+```{r}
 burned = st_join(l1pts, all_fires) %>% drop_na(.)
 ```
 
 ```{r}
 burned
 ```
+
+```{r}
+burned2 = burned %>% 
+  mutate(UniqueId = random_id(n= 154637, bytes = 4)) %>%
+  dplyr::select(UniqueId, lat:geometry)
+```
+
+```{r}
+burned_2004_2005
+```
+```{r}
+burned2_2004_2005 = burned_2004_2005 %>% 
+  mutate(UniqueId = random_id(n= 154243, bytes = 4)) %>%
+  dplyr::select(UniqueId, lat:geometry)
+```
+
+```{r}
+head(burned2_2004_2005)
+```
+
+```{r}
+n_distinct(burned2_2004_2005$UniqueId)
+```
+
 ```{r}
 ggplot() + 
   geom_sf(data = burned, size=.5, shape = 1, color ="grey50") +
@@ -252,15 +289,15 @@ ggplot() +
 
 # Write burned points to file
 ```{r eval=FALSE, include=FALSE}
-st_write(burned, "../outputs/Landscape1_burned_points.shp", driver="ESRI Shapefile")
+st_write(burned2, "../outputs/Landscape1/Landscape1_burned_points.shp", driver="ESRI Shapefile")
 ```
 
 # Convert to WGS 84
 
 ```{r}
-burned_wgs = st_transform(burned, crs=wgs_proj)
+burned2_wgs = st_transform(burned2, crs=wgs_proj)
 ```
 
 ```{r eval=FALSE, include=FALSE}
-st_write(burned_wgs, "../outputs/Landscape1_burned_points_wgs.shp", driver="ESRI Shapefile")
+st_write(burned2_wgs, "../outputs/Landscape1/Landscape1_burned_points_wgs.shp", driver="ESRI Shapefile")
 ```
