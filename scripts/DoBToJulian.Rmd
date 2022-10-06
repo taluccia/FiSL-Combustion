@@ -1,0 +1,111 @@
+---
+title: "Julian to month day year date"
+author: "Anna Talucci"
+date: '2022-09-28'
+output: html_document
+---
+
+# Overview
+Take Day of Burn julian day can convert to YYYY-MM-DD
+
+
+# Library
+```{r}
+library(tidyverse)
+library(sf)
+
+```
+
+
+# Data
+## Shapefile
+
+```{r}
+burned_pts = st_read("../data/Landscape1_pts/Landscape1_burned_points.shp", "Landscape1_burned_points")
+```
+## DoB
+```{r}
+data2004 =  read.csv("../data/Landscape1/DoB/Landscape1DoB2004.csv", header=TRUE, sep = ",", strip.white = TRUE)
+data2005 =  read.csv("../data/Landscape1/DoB/Landscape1DoB2005.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+head(data2004)
+```
+
+# add Date as string
+```{r}
+calendar2004 = data2004 %>% 
+  mutate(yyyymmdd = as.Date(DoB, origin = as.Date("2004-01-01"))) %>%
+  dplyr::select(-system.index, -.geo) %>%
+  mutate(Date = as.character(yyyymmdd))
+
+calendar2004
+
+```
+
+```{r}
+calendar2005 = data2005 %>% 
+  mutate(yyyymmdd = as.Date(DoB, origin = as.Date("2005-01-01"))) %>%
+  dplyr::select(-system.index, -.geo) %>%
+  mutate(Date = as.character(yyyymmdd))
+
+calendar2005
+
+```
+```{r}
+str(calendar2005)
+```
+```{r}
+unique(calendar2005$Date)
+```
+
+```{r}
+unique(calendar2004$Date)
+```
+
+# Combine 2004 & 2005
+```{r}
+combo = rbind(calendar2004, calendar2005)
+```
+# Write to csv
+```{r eval=FALSE, include=FALSE}
+write.csv(calendar2004, '../outputs/CalendarDate/DoBCalendar2004.csv', row.names = FALSE)
+write.csv(calendar2005, '../outputs/CalendarDate/DoBCalendar2005.csv', row.names = FALSE)
+```
+
+# Combine table with points
+
+```{r}
+combo
+```
+
+```{r}
+head(burned_pts)
+```
+
+
+```{r}
+pts_dob = merge(burned_pts, combo, by=c("UniqueId", "lat", "lon", "NAME", "FIREID", "FIREYEAR"))
+```
+
+```{r}
+pts_dob
+```
+
+# Rename columns
+```{r}
+rename_pts_dob = pts_dob %>% 
+  rename( ID1 = UniqueId, ID2 = FIREYEAR, DOB_Ist = DoB) %>%
+  dplyr::select(ID1, ID2, DOB_Ist, Date, NAME, FIREID, lat, lon)
+
+rename_pts_dob
+```
+
+```{r}
+str(rename_pts_dob)
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(rename_pts_dob, "../outputs/Landscape1/Landscape1_burnedpts_dob_wgs.shp", driver="ESRI Shapefile")
+```
