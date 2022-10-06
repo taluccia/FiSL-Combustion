@@ -1,0 +1,90 @@
+---
+title: "Day Of Burn Translate"
+author: "Anna Talucci"
+date: '2022-09-28'
+output: html_document
+---
+
+
+
+# Overview
+
+Combine DEM tiles for AK field sites latitude and longitude range 
+
+for AK lat range -150.9016 ymin: 62.6914 xmax: -141.3446 ymax: 67.0571
+
+# Packages 
+
+```{r}
+library(terra)
+library(gdalUtilities)
+library(sf)
+```
+
+
+# Data
+
+## Rasters
+```{r}
+trans2015<-rast("../data/translate/translated_2015.tif")
+trans2016<-rast("../data/translate/translated_2016.tif")
+```
+
+```{r}
+trans2015
+```
+```{r}
+# coordinate reference system (CRS)
+crs(trans2015)
+
+ncell(trans2015)
+
+dim(trans2015)
+
+# spatial resolution
+res(trans2015)
+
+# Number of bands
+nlyr(trans2015)
+
+```
+## Landscape 1
+
+```{r}
+l1 = st_read("../data/FirstLandscape/caribou_pker_ck.shp", "caribou_pker_ck")
+```
+
+```{r}
+st_crs(l1)$proj4string
+L1_projection = st_crs(l1)$proj4string
+st_crs(l1)$epsg
+```
+# subset bands
+```{r}
+trans2015band2 <- subset(trans2015, 2)
+trans2015band2
+```
+## Plot DEM
+```{r}
+
+plot(st_geometry(l1))
+```
+```{r}
+plot(trans2015band2)
+```
+# Reprojection
+```{r eval=FALSE, include=FALSE}
+reproj_r2015 = terra::project(trans2015band2, L1_projection)
+```
+# Crop
+```{r}
+trans2015crop <- crop(reproj_r2015, l1)
+```
+
+```{r}
+plot(trans2015crop)
+```
+
+```{r}
+trans2015crop
+```
