@@ -43,33 +43,25 @@ landsat
 
 ## Static
 ```{r}
-static2004 =  read.csv("../data/Landscape1/Static/static_test2004.csv", header=TRUE, sep = ",", strip.white = TRUE)
-static2005 =  read.csv("../data/Landscape1/Static/static_test2005.csv", header=TRUE, sep = ",", strip.white = TRUE)
+static =  read.csv("../data/Landscape1/Static/static_test.csv", header=TRUE, sep = ",", strip.white = TRUE)
 ```
+
+
 ```{r}
-static2005
-```
-```{r}
-static2004
-```
-```{r}
-static = rbind(static2004, static2005)
 static
 ```
 
 # Select columns & rename to match
 ```{r}
 static1 = static %>% 
-  dplyr::select(BD_30:pH_30) %>%
-  rename( ID1 = UniqueId, ID2 = FIREYEAR) 
+  dplyr::select(ID1, ID2,BD_30:FIREID, NAME:pH_30) 
 
 static1
 ```
 
 ```{r}
 landsat1 = landsat %>% 
-  dplyr::select(FIREID:wetness) %>%
-  rename( ID1 = UniqueId, ID2 = FIREYEAR) 
+  dplyr::select(FIREID:wetness) 
 ```
 
 
@@ -77,6 +69,7 @@ landsat1 = landsat %>%
 fwi1 = fwi_bind %>% 
   dplyr::select(BUI:wspeed)  
 ```
+
 # Check number of IDs
 ```{r}
 length(unique(landsat1$ID1))
@@ -84,7 +77,27 @@ length(unique(static1$ID1))
 length(unique(fwi1$ID1))
 ```
 
+# Combine data 
+```{r}
+static1
+landsat1
+fwi1
+```
 
+```{r}
+combine1 = merge(static1, landsat1, by = c("ID1", "ID2", "NAME", "FIREID", "lat", "lon"))
+```
 
+```{r}
+combine1
+```
+
+```{r}
+combine2 = merge(static1, fwi1, by = c("ID1", "ID2", "NAME", "FIREID", "lat", "lon"))
+```
+
+```{r}
+combine2
+```
 
 **THE END**
