@@ -21,7 +21,7 @@ library(sf)
 ## Shapefile
 
 ```{r}
-burned_pts = st_read("../data/Landscape1_pts/Landscape1_burned_points.shp", "Landscape1_burned_points")
+burned_pts = st_read("../data/Landscape1_pts/Landscape1_burned_points_wgs.shp", "Landscape1_burned_points_wgs")
 ```
 ## DoB
 ```{r}
@@ -86,7 +86,7 @@ head(burned_pts)
 
 
 ```{r}
-pts_dob = merge(burned_pts, combo, by=c("UniqueId", "lat", "lon", "NAME", "FIREID", "FIREYEAR"))
+pts_dob = merge(burned_pts, combo, by=c("ID1", "ID2", "lat", "lon", "NAME", "FIREID"))
 ```
 
 ```{r}
@@ -96,7 +96,7 @@ pts_dob
 # Rename columns
 ```{r}
 rename_pts_dob = pts_dob %>% 
-  rename( ID1 = UniqueId, ID2 = FIREYEAR, DOB_Ist = DoB) %>%
+  rename(DOB_Ist = DoB) %>%
   dplyr::select(ID1, ID2, DOB_Ist, Date, NAME, FIREID, lat, lon)
 
 rename_pts_dob
@@ -104,6 +104,10 @@ rename_pts_dob
 
 ```{r}
 str(rename_pts_dob)
+```
+
+```{r}
+unique(rename_pts_dob$Date)
 ```
 
 ```{r eval=FALSE, include=FALSE}
