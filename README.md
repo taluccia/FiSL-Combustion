@@ -20,7 +20,7 @@ Processing combustion layer data for Landscapes used in simulation models.
 
 
 ### GEE
-
+Day-of-Burn--From Earth Engine use script named "DayOfBurnSimple"
 GEE Scripts
 1. Script 1
 2. Script 2
