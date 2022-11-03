@@ -100,4 +100,8 @@ combine2 = merge(static1, fwi1, by = c("ID1", "ID2", "NAME", "FIREID", "lat", "l
 combine2
 ```
 
+
+```{r}
+write_csv(combine2, "../outputs/Landscape1DataForCombustionModel.csv")
+```
 **THE END**
