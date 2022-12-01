@@ -134,7 +134,9 @@ ggplot() +
   geom_sf(data = intersect, color = "blue") +
   coord_sf()
 ```
-
+```{r eval=FALSE, include=FALSE}
+st_write(intersect, "../outputs/Landscape1BurnedAreaPoly.shp", driver="ESRI Shapefile")
+```
 
 # For cropped polgygons in Landscape 1
  adding attributes back after cropping
@@ -311,3 +313,4 @@ burned3_wgs = st_transform(burned3, crs=wgs_proj)
 ```{r eval=FALSE, include=FALSE}
 st_write(burned3_wgs, "../outputs/Landscape1/Landscape1_burned_points_wgs.shp", driver="ESRI Shapefile")
 ```
+
