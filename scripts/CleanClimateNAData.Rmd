@@ -1,0 +1,69 @@
+---
+title: "ClimateNA Data"
+author: "Anna Talucci"
+date: '2022-11-16'
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+CsvToPairWithClimateNA_Normal_1981_2010MSY
+## Climate NA
+```{r}
+cna =  read.csv("../data/Landscape1/CNA/Landscape1DFforCNA_Normal_1981_2010MSY.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+fireid_cna = read.csv( "../data/Landscape1/CNA/CsvToPairWithClimateNA.csv")
+```
+
+```{r}
+head(cna)
+
+```
+
+"VPD"                          
+ [3] "CNA_PPT_5_8"                   "CNA_DD_18_5_8"                
+ [5] "CNA_DD18_sm"                   "CNA_NFFD_5_8"                 
+ [7] "CNA_PAS_5_8"                   "CNA_RH_5_8"                   
+ [9] "CNA_Tave_5_8"                  "CNA_MAT"                      
+[11] "CNA_MWMT"                      "CNA_MCMT"                     
+[13] "CNA_TD"                        "CNA_MSP"                      
+[15] "CNA_DD18"                      "CNA_NFFD"                     
+[17] "CNA_bFFP"                      "CNA_eFFP"                     
+[19] "CNA_FFP"                       "CNA_RH"               
+
+"CNA_DD_0_5_8" "CNA_MAR" 
+```{r}
+cna1 = cna %>% 
+  dplyr::select(id1, id2, Latitude, Longitude, MAP, DD_18, DD5, DD_0, PAS, AHM, Eref, CMD, SHM, EMT, EXT, Tmax_sm, Tmin_sm, DD5_sm, Eref_sm, CMD_sm, Rad_sm, RH, eFFP, NFFD, MSP, MCMT, MAT, RH_sm, NFFD_sm, DD_18_sm, FFP, bFFP, DD18, TD, MWMT, Tave_sm, PAS_sm, DD18_sm, PPT_sm, DD_0_sm, MAR) %>%
+  rename(ID1=id1, ID2=id2, lat=Latitude, lon=Longitude, CNA_MAP=MAP, CNA_DD_18=DD_18, CNA_DD5=DD5, CNA_DD_0=DD_0, CNA_PAS=PAS, CNA_AHM=AHM, CNA_Eref=Eref, CNA_CMD=CMD, CNA_SHM=SHM, CNA_EMT=EMT, CNA_EXT=EXT, CNA_Tmax_5_8=Tmax_sm, CNA_Tmin_5_8=Tmin_sm, CNA_DD5_5_8=DD5_sm, CNA_Eref_5_8=Eref_sm, CNA_CMD_5_8=CMD_sm, CNA_Rad_5_8=Rad_sm, CNA_RH=RH, CNA_eFFP=eFFP, CNA_NFFD=NFFD, CNA_MSP=MSP, CNA_MCMT=MCMT, CNA_MAT=MAT, CNA_RH_5_8 =RH_sm, CNA_NFFD_5_8= NFFD_sm, CNA_DD_18_5_8= DD_18_sm, CNA_FFP = FFP, CNA_bFFP=bFFP, CNA_DD18 = DD18, CNA_TD=TD, CNA_MWMT=MWMT, CNA_Tave_5_8=Tave_sm, CNA_PAS_5_8 = PAS_sm, CNA_DD18_sm=DD18_sm, CNA_PPT_5_8=PPT_sm, CNA_DD_0_5_8= DD_0_sm, CNA_MAR=MAR)
+```
+
+```{r}
+write_csv(cna1, "../outputs/Landscape1CLimateNAData2.csv")
+```
+
+```{r eval=FALSE, include=FALSE}
+cna2 = merge(cna1, fireid_cna, by=c("ID1", "ID2"))
+```
+
+```{r eval=FALSE, include=FALSE}
+cna2 %>% dplyr::select(ID1:lon.x, lat.y, lon.y, NAME, FIREID, CNA_MAP:CNA_Rad_5_8)
+```
+
+```{r eval=FALSE, include=FALSE}
+cna3 = cna2 %>% 
+  dplyr::select(ID1:ID2, NAME, FIREID, lat.x, lon.x, CNA_MAP:CNA_Rad_5_8) %>%
+  rename(lat = lat.x, lon = lon.x)
+  
+```
+
+
+# Write to csv
+
+```{r eval=FALSE, include=FALSE}
+write_csv(cna3, "../outputs/Landscape1CLimateNAData.csv")
+```
