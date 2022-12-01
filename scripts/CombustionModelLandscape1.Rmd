@@ -7,94 +7,172 @@ output: html_document
 
 # Overview
 
+Trouble shooting
+https://stackoverflow.com/questions/30097730/error-when-using-predict-on-a-randomforest-object-trained-with-carets-train
+
 # Library
 ```{r}
 library(tidyverse)
 library(ranger)
 library(e1071)
+library(arrow)
 ```
 # Models
 ```{r}
-model_above <- readRDS("../models/aboveground.rds")
-model_below <- readRDS("../models/belowgrounds.rds")
-model_depth <- readRDS("../models/burn_depth.rds")
+above_model <- readRDS("../models/aboveground.rds")
+below_model <- readRDS("../models/belowgrounds.rds")
+depth_model <- readRDS("../models/burn_depth.rds")
 ```
 
-```{r eval=FALSE, include=FALSE}
-model_above 
+
+
+# Landscape 1 Data
+```{r}
+landscape1_above = read.csv("../data/Landscape1/CombustionModel/Landscape1DataForCombustionModelABOVE.csv")
+```
+
+```{r}
+landscape1_below = read.csv("../data/Landscape1/CombustionModel/Landscape1DataForCombustionModelBELOW.csv")
+```
+
+```{r}
+l1_modeldata = read.csv("../data/Landscape1/CombustionModel/Landscape1DataForCombustionModel.csv")
+```
+```{r}
+landscape1_above
+landscape1_below
+```
+
+
+# Read in predictive data from stefano
+```{r}
+abovefed <- read_parquet("../data/TrainingDataFrame/abovefed_for_predict.parquet")
+head(abovefed)
 ```
 
 # Training Data
+Original model training data.
+```{r}
+above_train =  read.csv("../data/TrainingDataFrame/aboveground.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+below_train =  read.csv("../data/TrainingDataFrame/belowground.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
 ```{r}
 above_importance =  read.csv("../data/TrainingDataFrame/aboveground_importance.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
 below_importance =  read.csv("../data/TrainingDataFrame/belowground_importance.csv", header=TRUE, sep = ",", strip.white = TRUE)
 ```
 
-#Training models 
-Training each model with optimized parameters from Stefano ABOVEFed Model
+# Check with AboveFed Training data
 ```{r}
-model_ranger_above <- ranger(y ~., data = df, mtry = final_model$bestTune$mtry, splitrule = final_model$bestTune$splitrule, min.node.size = final_model$bestTune$min.node.size)
+setdiff(names(abovefed), names(l1_modeldata))
 ```
 
 ```{r}
-model_ranger_below <- ranger(y ~., data = df, mtry = final_model$bestTune$mtry, splitrule = final_model$bestTune$splitrule, min.node.size = final_model$bestTune$min.node.size)
+setdiff(names(below_train), names(l1_modeldata))
 ```
 
-# Predict
-Not finished...
 ```{r}
-predict(object=model_above, newdata = Landscape1, type="response", norm.votes=TRUE, predict.all=FALSE, proximity=FALSE, nodes=FALSE, cutoff, ...)
+setdiff(names(above_train), names(l1_modeldata))
+```
+
+```{r}
+setdiff(names(above_train), names(below_train))
+```
+```{r}
+setdiff(below_importance$Variables, names(l1_modeldata))
+```
+
+```{r}
+setdiff(above_importance$Variables, names(l1_modeldata))
+```
+
+```{r}
+below_importance
+```
+
+#select only important variables
+```{r}
+above_train2 <- above_train %>% select(above_importance$Variables)
+below_train2 <- below_train %>% select(below_importance$Variables)
+above_train2$above.carbon.combusted = above_train$above.carbon.combusted
+below_train2$below.ground.carbon.combusted = below_train$below.ground.carbon.combusted
 ```
 
 
-# Stefano's code (copied from Slack)
+# Training models 
 
-#read in the model I sent
+Training each model with optimized parameters from Stefano's ABOVEFed Model
 ```{r}
-final_model <- readRDS(in_model)
-```
-#read in the dataframe initially used to train the model
-```{r}
-df = read_csv(training_frame)
-```
-#train new model using optimized paramaters
-```{r}
-  model_ranger_final <- ranger(y ~., data = df, mtry = final_model$bestTune$mtry, splitrule = final_model$bestTune$splitrule, min.node.size = final_model$bestTune$min.node.size)
-```
-#read in final data to predict on
-```{r}
-pred_df = read_csv(pred_frame)
+model_ranger_above <- ranger(above.carbon.combusted ~., data = above_train2, mtry = above_model$bestTune$mtry, splitrule = above_model$bestTune$splitrule, min.node.size = above_model$bestTune$min.node.size)
 ```
 
-#predict 
 ```{r}
- preds <- predict(model_ranger_final, data = pred_df)
+model_ranger_below <- ranger(below.ground.carbon.combusted ~., data = below_train2, mtry = below_model$bestTune$mtry, splitrule = below_model$bestTune$splitrule, min.node.size = below_model$bestTune$min.node.size)
 ```
-#pul out predictions
+
 ```{r}
-preds = preds$Preds
+rownames(below_model$importance)
+below_model$bestTune$splitrule
+below_model$bestTune$mtry
+below_model$bestTune$min.node.size
 ```
-#read in the model I sent
+
+
+
+# Predict combustion with all independent variables
+These predictive models use all independent variables.
+
 ```{r}
-final_model <- readRDS(in_model)
+landscape1_above1 = landscape1_above %>% drop_na()
+landscape1_below1 = landscape1_below %>%  drop_na()
 ```
-#read in the dataframe initially used to train the model
+
 ```{r}
-df = read_csv(training_frame)
+landscape1_above2 = landscape1_above1 %>% select(above_importance$Variables) 
+landscape1_below2 = landscape1_below1 %>% select(below_importance$Variables) 
 ```
-#train new model using optimized paramaters
+
+## Aboveground preditions 
 ```{r}
-model_ranger_final <- ranger(y ~., data = df, mtry = final_model$bestTune$mtry, splitrule = final_model$bestTune$splitrule, min.node.size = final_model$bestTune$min.node.size)
+pred_above = predict(model_ranger_above, landscape1_above2)
 ```
-#read in final data to predict on
+
 ```{r}
-pred_df = read_csv(pred_frame)
+AbovepredResults <- data.frame(predict(model_ranger_above, landscape1_above2))
+AbovepredResults
 ```
-#predict 
+
 ```{r}
- preds <- predict(model_ranger_final, data = pred_df)
+above_pred <- cbind(landscape1_above1, AbovepredResults)
+above_pred
 ```
-#pul out predictions
+
+```{r eval=FALSE, include=FALSE}
+write_csv(above_pred, "../outputs/Landscape1PredictedAbovegroundCombustion.csv")
+```
+
+## Below Combustion
+ 
 ```{r}
-preds = preds$Preds
+pred_below = predict(model_ranger_below, landscape1_below2)
 ```
+
+```{r}
+BelowpredResults <- data.frame(predict(model_ranger_below, landscape1_below2))
+
+```
+
+```{r}
+below_pred <- cbind(landscape1_below1, BelowpredResults)
+```
+
+```{r eval=FALSE, include=FALSE}
+write_csv(below_pred, "../outputs/Landscape1PredictedBelowgroundCombustion.csv")
+```
+
