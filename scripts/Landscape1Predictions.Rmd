@@ -1,0 +1,133 @@
+---
+title: "Combustion Raster"
+author: "Anna Talucci"
+date: '2022-11-28'
+output: html_document
+---
+
+# Overview
+
+# Projections
+
+
+# Packages
+```{r}
+library(terra)
+library(gdalUtilities)
+library(sf)
+library(tidyverse)
+library(stars)
+```
+
+# Data
+
+## predictions
+```{r}
+above = read.csv("../data/Landscape1/PredictedCombustion/Landscape1PredictedAbovegroundCombustion.csv")
+```
+
+```{r}
+below = read.csv("../data/Landscape1/PredictedCombustion/Landscape1PredictedBelowgroundCombustion.csv")
+```
+
+## poker creek
+```{r}
+L1 = st_read("../data/FirstLandscape/caribou_pker_ck.shp", "caribou_pker_ck")
+```
+
+## Shapefiles
+```{r}
+burned1 = st_read("../data/Landscape1/shapefile/Landscape1BurnedAreaPoly.shp", "Landscape1BurnedAreaPoly")
+```
+## raster
+```{r}
+r1<-rast("../data/LandscapeRaster/FiSL-Landscape1.tif")
+```
+
+```{r}
+r1
+```
+```{r}
+plot(r1)
+```
+# Points
+
+```{r}
+above_pts = st_as_sf(above, coords = c("lon", "lat"), crs = 4326)
+```
+
+```{r}
+below_pts = st_as_sf(below, coords = c("lon", "lat"), crs = 4326)
+```
+
+# transform projection
+```{r}
+above_pts_reprj = st_transform(above_pts, crs = st_crs(L1))
+```
+
+```{r}
+below_pts_reprj = st_transform(below_pts, crs = st_crs(L1))
+```
+
+# numeric
+```{r}
+above_pts_reprj = transform(above_pts_reprj, prediction = as.numeric(prediction))
+```
+
+# Make Raster 
+```{r}
+r_above =  rasterize(vect(above_pts_reprj), r1, field = "prediction")
+```
+
+```{r}
+r_above
+```
+
+```{r}
+r_below = rasterize(vect(below_pts_reprj), r1, field = "prediction")
+```
+
+```{r}
+r_below
+```
+# Clip raster to burned area
+```{r}
+plot(mask(crop(r_below,burned1),burned1))
+#plot(burned1, add = T)
+```
+
+```{r}
+r_above1 = mask(crop(r_above, burned1), burned1)
+r_below1 = mask(crop(r_below, burned1), burned1)
+```
+
+
+# Plot
+```{r}
+r_above1 %>% 
+  as.data.frame(xy = TRUE) %>%
+ggplot() +
+  geom_raster(aes(x = x, y = y, fill =  lyr1)) +
+    ggtitle("Aboveground combustion")
+
+```
+
+```{r}
+r_below1 %>% 
+  as.data.frame(xy = TRUE) %>%
+ggplot() +
+  geom_raster(aes(x = x, y = y, fill =  lyr1)) +
+  ggtitle("Belowground combustion")
+
+```
+
+
+
+# Write Rasters
+```{r eval=FALSE, include=FALSE}
+writeRaster(r_below1, "../outputs/Landscape1/Landscape1BelowgroundCombustion.tif", overwrite=TRUE, filetype="GTiff")
+```
+
+```{r eval=FALSE, include=FALSE}
+writeRaster(r_above1, "../outputs/Landscape1/Landscape1AbovegroundCombustion.tif", overwrite=TRUE, filetype="GTiff")
+```
