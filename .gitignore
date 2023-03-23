@@ -38,7 +38,10 @@ rsconnect/
 
 # For Mac users computer specific files
 **/.DS_Store
-
+**/._.DS_Store
+**/._FiSL-Combustion.Rproj
+**._models
+**scripts/._CombustionModelLandscape1.Rmd
 # exclude specific folders from push to github
 figures/*
 images/*
